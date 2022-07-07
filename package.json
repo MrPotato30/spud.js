@@ -1,0 +1,25 @@
+{
+    "name": "spud.js",
+    "version": "2.0.2",
+    "description": "A Discord.js v13 pagination package",
+    "main": "./index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node ."
+    },
+    "keywords": [
+        "spud.js",
+        "spud",
+        "pagination",
+        "discord",
+        "djs",
+        "js"
+    ],
+    "author": "MrPotato30",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^0.24.0",
+        "discord.js": "^13.8.1"
+    },
+    "homepage": "https://spud.js.org"
+}
