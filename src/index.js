@@ -7,6 +7,3 @@ module.exports = {
     welcomer: require("./functions/welcomer"),
   },
 };
-let spudjsClient = require(`./classes/client.js`);
-const client = (global.client = new spudjsClient());
-client.start();
