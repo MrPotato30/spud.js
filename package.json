@@ -18,8 +18,7 @@
     "author": "MrPotato30",
     "license": "ISC",
     "dependencies": {
-        "discord.js": "^13.8.1",
-        "dotenv": "^16.0.1"
+        "discord.js": "^13.8.1"
     },
     "homepage": "https://spud.js.org"
 }
