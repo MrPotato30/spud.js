@@ -26,7 +26,8 @@ module.exports = class MenuPagination {
     let customFuntion = customComponents?.event?.collect;
     let customFuntion2 = customComponents?.event?.end;
     let index = 0;
-    let mappedOptions = options.map((x) => {
+    let mappedOptions = options.map((x, i) => {
+      x.embed = options[i].embed ?? options[i]?.pagination?.options?.embeds[0];
       let value = {
         label: x.label, // required
         value: index + "",
@@ -71,10 +72,31 @@ module.exports = class MenuPagination {
       return sentMsg;
     }
 
+    // options[0].embed
+    //   ? options[0].embed
+    //   : options[0]?.pagination.options.embeds[0];
+    let currentMenuPage = 0;
+    let currentPage = 0;
+    let paginationComponents = (
+      menuPage = currentMenuPage,
+      page = currentPage
+    ) => {
+      return options[menuPage]?.pagination
+        ? [row]
+            .concat(
+              options[menuPage].pagination.components(
+                page,
+                options[menuPage].pagination.options.embeds.length
+              )
+            )
+            .concat(customComp)
+        : [row].concat(customComp);
+    };
+
     send({
       content,
-      components: [row].concat(customComp),
-      embeds: homeEmbeds?.flat(Infinity) ?? [options[0].embed],
+      components: paginationComponents(),
+      embeds: homeEmbeds?.flat(Infinity) ?? [options[0]?.embed],
       allowedMentions: { repliedUser: ping },
       fetchReply: interaction,
     }).then((sentMsg) => {
@@ -95,6 +117,51 @@ module.exports = class MenuPagination {
       if (customFuntion2) collector.on("end", customFuntion2);
 
       collector.on("collect", (i) => {
+        if (i.customId === "selectMenu") return;
+        const id = i.customId;
+        let clicker = i.user.id;
+        let components =
+          options[currentMenuPage]?.pagination?.components ??
+          function (a, b) {
+            return [];
+          };
+        let embeds = options[currentMenuPage].pagination.options.embeds;
+        if (clicker !== filter)
+          return i.reply({
+            content: "This is not for you!",
+            ephemeral: true,
+          });
+        if (id == "next") {
+          currentPage++;
+          return i.update({
+            embeds: [embeds[currentPage]],
+            components: [row].concat(components(currentPage, embeds.length)),
+          });
+        }
+        if (id == "previous") {
+          currentPage--;
+          return i.update({
+            embeds: [embeds[currentPage]],
+            components: [row].concat(components(currentPage, embeds.length)),
+          });
+        }
+        if (id == "first") {
+          currentPage = 0;
+          return i.update({
+            embeds: [embeds[currentPage]],
+            components: [row].concat(components(currentPage, embeds.length)),
+          });
+        }
+        if (id == "last") {
+          currentPage = embeds.length - 1;
+          return i.update({
+            embeds: [embeds[currentPage]],
+            components: [row].concat(components(currentPage, embeds.length)),
+          });
+        }
+      });
+
+      collector.on("collect", (i) => {
         if (i.customId !== "selectMenu") return;
         let clicker = i.user.id;
         if (clicker !== filter)
@@ -102,10 +169,21 @@ module.exports = class MenuPagination {
             content: "This is not for you!",
             ephemeral: true,
           });
-        return i.update({ embeds: [options[i.values[0]].embed] });
+        currentMenuPage = i.values[0];
+        currentPage = 0;
+        if (options[i.values[0]]?.function) options[i.values[0]]?.function();
+        return i.update({
+          embeds: [options[i.values[0]].embed],
+          components: paginationComponents(currentMenuPage, currentPage),
+        });
       });
 
       collector.on("end", () => {
+        let components =
+          options[currentMenuPage]?.pagination?.components ??
+          function (a, b) {
+            return [];
+          };
         sentMsg
           .edit({
             components: [
@@ -114,11 +192,11 @@ module.exports = class MenuPagination {
                   .setPlaceholder(expiredPlaceholder ?? placeholder)
                   .setDisabled(true)
               ),
-            ].concat(customComp),
+            ]
+              .concat(components(0, 1))
+              .concat(customComp),
           })
-          .catch((e) => {
-            console.log(e);
-          });
+          .catch((e) => {});
       });
     });
   }
