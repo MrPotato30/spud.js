@@ -96,9 +96,14 @@ class ButtonPaginationBuilder {
     };
     return this;
   }
+  pageFooter(Boolean) {
+    this.pageFooter = Boolean;
+    return this;
+  }
 }
 
-ButtonPaginationBuilder.prototype.send = function () {
+ButtonPaginationBuilder.prototype.send = function (send = true) {
+  this.dontSend = !send;
   let pagination = new MessagePagination(this);
   return pagination;
 };

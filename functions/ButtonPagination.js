@@ -35,6 +35,7 @@ module.exports = class ButtonPagination {
         pageTravel,
         trashBin,
         customComponents,
+        pageFooter,
       } = options;
       let currentPage = 0;
 
@@ -42,6 +43,7 @@ module.exports = class ButtonPagination {
       if (!channel && message) channel = message.channel;
       let customButtons = customComponents?.components ?? [];
       let customFuntion = customComponents?.event;
+      pageFooter = pageFooter ?? true;
 
       if (button) {
         button.forEach((value) => {
@@ -59,19 +61,20 @@ module.exports = class ButtonPagination {
 
       this.options = options;
 
-      embeds.forEach((embed, page) => {
-        let currentFooter = embed.footer;
-        if (currentFooter && currentFooter.text) {
-          embed.setFooter({
-            text: `${currentFooter.text} - Page ${page + 1} of ${
-              embeds.length
-            }`,
-            iconURL: currentFooter.iconURL,
-          });
-        } else {
-          embed.setFooter({ text: `Page ${page + 1} of ${embeds.length}` });
-        }
-      });
+      if (pageFooter)
+        embeds.forEach((embed, page) => {
+          let currentFooter = embed.footer;
+          if (currentFooter && currentFooter.text) {
+            embed.setFooter({
+              text: `${currentFooter.text} - Page ${page + 1} of ${
+                embeds.length
+              }`,
+              iconURL: currentFooter.iconURL,
+            });
+          } else {
+            embed.setFooter({ text: `Page ${page + 1} of ${embeds.length}` });
+          }
+        });
 
       let createButton = (id) => {
         return new MessageButton()
@@ -334,16 +337,20 @@ module.exports = class ButtonPagination {
         }
       }
 
-      let components = () => {
+      let components = (page = currentPage, maxPage = embeds.length) => {
         let arr1 = [
-          currentPage == 0
+          page == 0 && maxPage == 1
+            ? disabledRow
+            : page == 0
             ? firstPageRow
-            : currentPage !== embeds.length - 1
+            : page !== maxPage - 1
             ? row
             : lastPageRow,
         ].concat(customButtons);
         return arr1;
       };
+
+      this.components = components;
 
       let sentMsg;
 
@@ -360,18 +367,21 @@ module.exports = class ButtonPagination {
         fetchReply: options.replyOptions?.interaction ?? false,
       };
 
-      if (options.replyOptions) {
-        if (options.replyOptions.message) {
-          sentMsg = await options.replyOptions.message[
-            options.replyOptions.type ?? "reply"
-          ](sendObject);
+      if (options.dontSend === true) return;
+      else {
+        if (options.replyOptions) {
+          if (options.replyOptions.message) {
+            sentMsg = await options.replyOptions.message[
+              options.replyOptions.type ?? "reply"
+            ](sendObject);
+          } else {
+            sentMsg = await message[options.replyOptions.type ?? "reply"](
+              sendObject
+            );
+          }
         } else {
-          sentMsg = await message[options.replyOptions.type ?? "reply"](
-            sendObject
-          );
+          sentMsg = await channel.send(sendObject);
         }
-      } else {
-        sentMsg = await channel.send(sendObject);
       }
 
       let filter = customFilter ? customFilter : author.id;
