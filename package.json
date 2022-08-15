@@ -1,7 +1,7 @@
 {
     "name": "spud.js",
-    "version": "2.1.0",
-    "description": "A Discord.js v13 pagination package",
+    "version": "3.0.0",
+    "description": "A Discord.js pagination package",
     "main": "./index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,12 +13,19 @@
         "pagination",
         "discord",
         "djs",
-        "js"
+        "js",
+        "button",
+        "menu"
     ],
-    "author": "MrPotato30",
     "license": "ISC",
     "dependencies": {
-        "discord.js": "^13.8.1"
+        "discord.js": "^14.0.3"
     },
-    "homepage": "https://spud.js.org"
+    "homepage": "https://spud.js.org",
+    "contributors": [
+        "MrPotato30",
+        "keita-sama",
+        "nandhu-44",
+        "Zeptar1069"
+    ]
 }
