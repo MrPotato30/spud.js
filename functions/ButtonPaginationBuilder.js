@@ -73,7 +73,7 @@ class ButtonPaginationBuilder {
       properties.name = name;
       this.button.push(properties);
     } else {
-      arr[index] = properties;
+      this.button[index] = properties;
     }
     return this;
   }

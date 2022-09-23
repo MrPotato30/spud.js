@@ -6,5 +6,4 @@ module.exports = {
   API: {
     welcomer: require("./functions/welcomer"),
   },
-  spudError: require(`./functions/SpudError.js`)
 };
