@@ -35,7 +35,10 @@ module.exports = class ButtonPagination {
         pageTravel,
         trashBin,
         customComponents,
-        pageFooter,
+        pageFooterEnabled,
+        pageFooterValue,
+        filterMessage,
+        pageTravelMessage,
       } = options;
       let currentPage = 0;
 
@@ -43,7 +46,8 @@ module.exports = class ButtonPagination {
       if (!channel && message) channel = message.channel;
       let customButtons = customComponents?.components ?? [];
       let customFuntion = customComponents?.event;
-      pageFooter = pageFooter ?? true;
+      pageFooterEnabled = pageFooterEnabled ?? true;
+      pageFooterValue = pageFooterValue ?? ((a,b) => `- Page ${a} of ${b}`)
 
       if (button) {
         button.forEach((value) => {
@@ -61,18 +65,16 @@ module.exports = class ButtonPagination {
 
       this.options = options;
 
-      if (pageFooter)
+      if (pageFooterEnabled)
         embeds.forEach((embed, page) => {
           let currentFooter = embed.footer;
           if (currentFooter && currentFooter.text) {
             embed.setFooter({
-              text: `${currentFooter.text} - Page ${page + 1} of ${
-                embeds.length
-              }`,
+              text: `${currentFooter.text}` + pageFooterValue(page+1, embeds.length),
               iconURL: currentFooter.iconURL,
             });
           } else {
-            embed.setFooter({ text: `Page ${page + 1} of ${embeds.length}` });
+            embed.setFooter({ text: pageFooterValue(page + 1, embeds.length) });
           }
         });
 
@@ -364,6 +366,7 @@ module.exports = class ButtonPagination {
             : [disabledRow].concat(customButtons),
         allowedMentions: { repliedUser: ping },
         content: options.content,
+        ephemeral: options.replyOptions?.ephemeral ?? false,
         fetchReply: options.replyOptions?.interaction ?? false,
       };
 
@@ -406,10 +409,7 @@ module.exports = class ButtonPagination {
         const id = i.customId;
         let clicker = i.user.id;
         if (clicker !== filter)
-          return i.reply({
-            content: "This is not for you!",
-            ephemeral: true,
-          });
+          return i.reply(filterMessage);
         if (id == "next") {
           currentPage++;
           return i.update({
@@ -448,12 +448,9 @@ module.exports = class ButtonPagination {
           const numberTravel = async () => {
             const collector = channel.createMessageCollector({
               filter: (msg) => msg.author.id === i.user.id,
-              time: 30000,
+              time: pageTravelMessage?.time ?? 30000,
             });
-            await i.reply({
-              content: `Type the page you want to travel! You have **30s**. type \`cancel\` or \`stop\` to end`,
-              ephemeral: true,
-            });
+            await i.reply(pageTravelMessage.message);
 
             sentMsg.edit({ components: [disabledRow] });
 

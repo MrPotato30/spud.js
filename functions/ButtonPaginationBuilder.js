@@ -59,8 +59,15 @@ class ButtonPaginationBuilder {
     this.resetTimerOnClick = boolean;
     return this;
   }
-  pageTravel(boolean) {
+  pageTravel(
+    boolean,
+    message = {
+      content: `Type the page you want to travel! You have **30s**. type \`cancel\` or \`stop\` to end`,
+      ephemeral: true,
+    }
+  ) {
     this.pageTravel = boolean;
+    this.pageTravelMessage = message;
     return this;
   }
   setButtons(name, properties = {}) {
@@ -81,8 +88,18 @@ class ButtonPaginationBuilder {
     this.button = properties;
     return this;
   }
-  setFilter(User) {
+  setFilter(
+    User,
+    Options = {
+      time: 30000,
+      message: {
+        content: "This is not for you!",
+        ephemeral: true,
+      },
+    }
+  ) {
     this.customFilter = User?.id;
+    this.filterMessage = Options;
     return this;
   }
   trash(Boolean) {
@@ -96,8 +113,9 @@ class ButtonPaginationBuilder {
     };
     return this;
   }
-  pageFooter(Boolean) {
-    this.pageFooter = Boolean;
+  pageFooter(Boolean, text) {
+    this.pageFooterEnabled = Boolean;
+    this.pageFooterValue = text
     return this;
   }
 }
